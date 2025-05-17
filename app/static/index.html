@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Journal System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">School Journal</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item" id="nav-home">
+                        <a class="nav-link active" href="#">Home</a>
+                    </li>
+                    <li class="nav-item teacher-only" id="nav-create-journal">
+                        <a class="nav-link" href="#">Create Journal</a>
+                    </li>
+                    <li class="nav-item" id="nav-journals">
+                        <a class="nav-link" href="#">Journals</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center" id="auth-buttons">
+                    <button class="btn btn-light me-2" id="login-btn">Login</button>
+                    <button class="btn btn-outline-light" id="register-btn">Register</button>
+                </div>
+                <div class="d-flex align-items-center d-none" id="user-info">
+                    <div class="dropdown">
+                        <button class="btn btn-light dropdown-toggle position-relative" id="notification-btn"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notification-badge">
+                                0
+                            </span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" id="notification-menu">
+                            <li><div class="dropdown-item text-center" id="no-notifications">No notifications</div></li>
+                        </ul>
+                    </div>
+                    <span class="text-white mx-3" id="username-display"></span>
+                    <button class="btn btn-outline-light" id="logout-btn">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Authentication Section -->
+        <div id="auth-section" class="row justify-content-center">
+            <div class="col-md-6">
+                <!-- Login Form -->
+                <div class="card mb-4" id="login-form">
+                    <div class="card-header">Login</div>
+                    <div class="card-body">
+                        <form id="login-form-element">
+                            <div class="mb-3">
+                                <label for="login-username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="login-username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="login-password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="login-password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Login</button>
+                            <div class="alert alert-danger mt-3 d-none" id="login-error"></div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Register Form -->
+                <div class="card d-none" id="register-form">
+                    <div class="card-header">Register</div>
+                    <div class="card-body">
+                        <form id="register-form-element">
+                            <div class="mb-3">
+                                <label for="register-username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="register-username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="register-password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="register-password" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="register-user-type" class="form-label">I am a:</label>
+                                <select class="form-select" id="register-user-type" required>
+                                    <option value="student">Student</option>
+                                    <option value="teacher">Teacher</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Register</button>
+                            <div class="alert alert-danger mt-3 d-none" id="register-error"></div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Section (shown when logged in) -->
+        <div id="main-content" class="d-none">
+            <!-- Home Dashboard -->
+            <div id="home-section">
+                <h2>Dashboard</h2>
+                <div class="row mt-4">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">Recent Journals</div>
+                            <div class="card-body">
+                                <div id="recent-journals-list">
+                                    <p class="text-muted">Loading recent journals...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-header">Statistics</div>
+                            <div class="card-body">
+                                <div id="user-stats">
+                                    <p><strong>User Type:</strong> <span id="user-type-display"></span></p>
+                                    <p class="teacher-only"><strong>Total Journals:</strong> <span id="journal-count">0</span></p>
+                                    <p class="student-only"><strong>Tagged Journals:</strong> <span id="tagged-count">0</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card student-only">
+                            <div class="card-header">Recent Notifications</div>
+                            <div class="card-body" id="recent-notifications">
+                                <p class="text-muted">No new notifications</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Journal List Section -->
+            <div id="journals-section" class="d-none">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2>Journals</h2>
+                    <div class="teacher-only">
+                        <button class="btn btn-primary" id="create-journal-btn">Create New Journal</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div id="journals-list" class="row">
+                            <p class="text-muted">Loading journals...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Journal Creation Section -->
+            <div id="create-journal-section" class="d-none teacher-only">
+                <h2>Create New Journal</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <form id="journal-form">
+                            <div class="mb-3">
+                                <label for="journal-title" class="form-label">Title</label>
+                                <input type="text" class="form-control" id="journal-title" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="journal-description" class="form-label">Description</label>
+                                <textarea class="form-control" id="journal-description" rows="5" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="journal-students" class="form-label">Tag Students (Optional)</label>
+                                <select class="form-select" id="journal-students" multiple>
+                                    <!-- Student options will be loaded dynamically -->
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="journal-attachments" class="form-label">Attachments (Optional)</label>
+                                <input type="file" class="form-control" id="journal-attachments" multiple>
+                                <div id="attachment-preview" class="mt-2"></div>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="publish-journal">
+                                <label class="form-check-label" for="publish-journal">
+                                    Publish immediately
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Journal</button>
+                            <div class="alert alert-danger mt-3 d-none" id="journal-error"></div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Journal Detail Section -->
+            <div id="journal-detail-section" class="d-none">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 id="journal-detail-title">Journal Title</h2>
+                    <div class="teacher-only" id="journal-actions">
+                        <button class="btn btn-outline-primary me-2" id="edit-journal-btn">Edit</button>
+                        <button class="btn btn-success me-2 d-none" id="publish-journal-btn">Publish</button>
+                        <button class="btn btn-danger" id="delete-journal-btn">Delete</button>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <p class="text-muted">
+                            <small>Created by <span id="journal-author">Unknown</span> on <span id="journal-date">Unknown</span></small>
+                            <span class="badge bg-success ms-2" id="journal-published-badge">Published</span>
+                        </p>
+                        <div id="journal-detail-content"></div>
+                    </div>
+                </div>
+                <div class="card mb-4" id="journal-attachments-section">
+                    <div class="card-header">Attachments</div>
+                    <div class="card-body">
+                        <div id="journal-attachments-list">
+                            <p class="text-muted">No attachments</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card teacher-only" id="tagged-students-section">
+                    <div class="card-header">Tagged Students</div>
+                    <div class="card-body">
+                        <div id="tagged-students-list">
+                            <p class="text-muted">No students tagged</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Application Scripts -->
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/journal.js"></script>
+</body>
+</html>
