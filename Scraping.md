@@ -71,8 +71,8 @@ scrapping/
 
 ### Backend Setup
 ```bash
-python -m venv venv
-source venv/bin/activate   # On Windows, use `venv\Scripts\activate`
+python -m venv env
+env\Scripts\activate`
 pip install -r requirements.txt
 export OPENAI_API_KEY="your-openai-api-key"
 uvicorn main:app --reload

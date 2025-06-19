@@ -2,6 +2,12 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "overrides": {
+    "nth-check": "^2.1.1",
+    "postcss": "^8.4.31",
+    "svgo": "^3.0.0",
+    "webpack-dev-server": "^4.15.1"
+  },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
@@ -20,7 +26,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-resizable": "^3.0.5",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
     "recharts": "^2.15.3",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
